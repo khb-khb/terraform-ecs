@@ -27,6 +27,9 @@ jobs:
       - name: Checkout  # github repo 코드를 가상 머신에 다운로드
         uses: actions/checkout@v4
 
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v3
+
       - name: Configure AWS credentials (OIDC)  # AWS OIDC 인증
         uses: aws-actions/configure-aws-credentials@v4
         with:
