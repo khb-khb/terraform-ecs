@@ -47,7 +47,7 @@ jobs:
 
 # terraform connect, get info
       - name: Terraform init
-        working-directory: terraform./terraform
+        working-directory: ./terraform
         run: terraform init
 
       - name: get terraform outputs
