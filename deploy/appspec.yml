@@ -1,0 +1,10 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+        # 추후에 dev/prod 등에서 컨테이너 이름 다를 때, 포트가 환경별로 다를 때, 여러 서비스에 같은 배포 템플릿을 재사용할 때 변수화해서 사용
+          ContainerName: "web_container"
+          ContainerPort: 80

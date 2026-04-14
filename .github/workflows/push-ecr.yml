@@ -1,0 +1,92 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: ["master"]  # 브랜치 아직 모르면 일단 전체. 나중에 ["main"]로 좁히기
+
+permissions:
+  id-token: write  # AWS OIDC 토큰 생성 허용
+  contents: read  # repo 코드 읽기 허용
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+  AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  ECR_REPO: ${{ secrets.ECR_REPO }}
+  ECS_TASK_DEFINITION: deploy/ecs-task-definition.json
+  CONTAINER_NAME: web_container
+  CODEDEPLOY_APP: ecs_codedeploy
+  CODEDEPLOY_GROUP: codedeploy
+  APPSPEC_FILE: deploy/appspec.yml
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # github 가 제공하는 가상 머신, docker 빌드가 실행됨
+    steps:
+      - name: Checkout  # github repo 코드를 가상 머신에 다운로드
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)  # AWS OIDC 인증
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{env.AWS_ROLE_ARN}}
+          aws-region: ${{env.AWS_REGION}}
+
+      - name: Login to Amazon ECR  # Docker 가 ECR 에 push 할 수 있도록 로그인
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push  # Docker Build 및 Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .  # 현재 폴더에 있는 Dockerfile 사용
+          push: true  # ECR 에 Push
+          tags: |
+            ${{env.AWS_ACCOUNT}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPO}}:latest
+            ${{env.AWS_ACCOUNT}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPO}}:${{ github.sha }}
+
+# terraform connect, get info
+      - name: Terraform init
+        working-directory: terraform./terraform
+        run: terraform init
+
+      - name: get terraform outputs
+        id: tf
+        working-directory: ./terraform
+        run: | # terraform root main.tf 의 output 값을 가져온다
+          echo "LOG_GROUP=$(terraform output -raw ecs_log_group)" >> $GITHUB_ENV
+          echo "ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
+          echo "ECS_SERVICE=$(terraform output -raw ecs_service_name)" >> $GITHUB_ENV
+
+          echo "ecs_cluster=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
+          echo "ecs_service=$(terraform output -raw ecs_service_name)" >> $GITHUB_OUTPUT
+
+      - name: Inject values into task definition
+        run: | # deploy/ecs-task-definition.json 에서 ${Value} 문자열을 $Value 로 치환
+          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/ecs-task-definition.json
+          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/ecs-task-definition.json
+
+      - name: Check
+        run: cat deploy/ecs-task-definition.json
+
+  # Task Definition
+      - name: Render Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ env.AWS_ACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}
+  
+  # CODEDEPLOY
+      - name: Codedeploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          # 위 GITHUB_ENV 런타임에 넣은 값이라 값 전달이 안 될 수 있어 tf(id) step 에서 GITHUB OUTPUT 의 값을 가져온다.
+          service: ${{ steps.tf.outputs.ecs_service }}
+          cluster: ${{ steps.tf.outputs.ecs_cluster }}
+          wait-for-service-stability: false
+          codedeploy-appspec: ${{ env.APPSPEC_FILE }}
+          codedeploy-application: ${{ env.CODEDEPLOY_APP }}
+          codedeploy-deployment-group: ${{ env.CODEDEPLOY_GROUP }}
