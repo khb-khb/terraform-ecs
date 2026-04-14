@@ -52,7 +52,7 @@ jobs:
 
       - name: get terraform outputs
         id: tf
-        working-directory: ./terraform
+        working-directory: ./terraform # git repo terraform dir
         run: | # terraform root main.tf 의 output 값을 가져온다
           echo "LOG_GROUP=$(terraform output -raw ecs_log_group)" >> $GITHUB_ENV
           echo "ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
