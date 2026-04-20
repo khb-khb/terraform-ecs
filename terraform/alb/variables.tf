@@ -30,11 +30,11 @@ variable "health_check_path" {
   type = string
 }
 
-variable "prod_listener_port" {
+variable "prod_listener_http_port" {
   type = number
 }
 
-variable "listener_protocol" {
+variable "prod_listener_http_protocol" {
   type = string
 }
 
@@ -44,4 +44,24 @@ variable "green_tg_name" {
 
 variable "test_listener_port" {
   type = number
+}
+
+variable "test_listener_protocol" {
+  type = string
+}
+
+variable "prod_listener_https_port" {
+  type = number
+}
+
+variable "prod_listener_https_protocol" {
+  type = string
+}
+
+variable "ssl_policy" {
+  type = string
+}
+
+variable "certificate_arn" {
+  type = string
 }

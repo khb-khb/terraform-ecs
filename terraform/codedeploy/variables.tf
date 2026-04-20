@@ -34,6 +34,6 @@ variable "green_tg" {
   type = string
 }
 
-# variable "codedeploy_alarm" {
-#   type = list(string)
-# }
+variable "codedeploy_alert" {
+  type = list(string)
+}

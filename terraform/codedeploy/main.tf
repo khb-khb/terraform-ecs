@@ -58,8 +58,8 @@ resource "aws_codedeploy_deployment_group" "ecs_group" {
     ]
   }
 
-  #   alarm_configuration {
-  #     alarms  = var.codedeploy_alarm
-  #     enabled = true
-  #   }
+  alarm_configuration {
+    alarms  = var.codedeploy_alert
+    enabled = true
+  }
 }

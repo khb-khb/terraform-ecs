@@ -3,9 +3,9 @@ resource "aws_ecs_task_definition" "this" {
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   execution_role_arn       = var.execution_role_arn
-
-  cpu    = var.task_cpu
-  memory = var.task_mem
+  task_role_arn            = var.task_role_arn
+  cpu                      = var.task_cpu
+  memory                   = var.task_mem
 
   container_definitions = jsonencode([
     {
@@ -38,11 +38,12 @@ resource "aws_ecs_cluster" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name            = var.ecs_service_name
-  cluster         = aws_ecs_cluster.this.id
-  task_definition = aws_ecs_task_definition.this.arn
-  desired_count   = var.desired_count
-  launch_type     = "FARGATE"
+  name                   = var.ecs_service_name
+  cluster                = aws_ecs_cluster.this.id
+  task_definition        = aws_ecs_task_definition.this.arn
+  desired_count          = var.desired_count
+  launch_type            = "FARGATE"
+  enable_execute_command = true
 
   deployment_controller {
     type = "CODE_DEPLOY"
@@ -54,7 +55,7 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = false
   }
   load_balancer {
-    target_group_arn = var.blue_ecs_tg_arn
+    target_group_arn = var.ecs_tg_arn
     container_name   = var.container_name
     container_port   = var.container_port
   }

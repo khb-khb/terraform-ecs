@@ -34,7 +34,7 @@ variable "ecs_sg" {
   type = list(string)
 }
 
-variable "blue_ecs_tg_arn" {
+variable "ecs_tg_arn" {
   type = string
 }
 
@@ -55,5 +55,9 @@ variable "task_cpu" {
 }
 
 variable "task_mem" {
+  type = string
+}
+
+variable "task_role_arn" {
   type = string
 }

@@ -2,7 +2,7 @@ name: Build and Push to ECR
 
 on:
   push:
-    branches: ["master"]  # 브랜치 아직 모르면 일단 전체. 나중에 ["main"]로 좁히기
+    branches: ["master"]
 
 permissions:
   id-token: write  # AWS OIDC 토큰 생성 허용

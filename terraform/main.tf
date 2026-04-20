@@ -45,9 +45,16 @@ module "alb" {
   tg_vpc_id         = module.vpc.vpc_id
   health_check_path = "/"
 
-  prod_listener_port = 80
-  test_listener_port = 8080
-  listener_protocol  = "HTTP"
+  prod_listener_http_port     = 80
+  prod_listener_http_protocol = "HTTP"
+
+  prod_listener_https_port     = 443
+  prod_listener_https_protocol = "HTTPS"
+  ssl_policy                   = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn              = module.acm.certificate_arn
+
+  test_listener_port     = 8080
+  test_listener_protocol = "HTTP"
 }
 
 module "security_group" {
@@ -73,11 +80,13 @@ module "iam_role" {
   codedeploy_role_name         = "codedeployRole"
   monitoring_chatbot_role_name = "monitoring_chatbotRole"
   codedeploy_chatbot_role_name = "codedeploy_chatbotRole"
+  ecs_task_role_name           = "ecstaskRole"
 }
 
 module "ecs" {
   source             = "./ecs"
   execution_role_arn = module.iam_role.ecs_task_execution_role_arn
+  task_role_arn      = module.iam_role.ecs_task_role_arn
   ecs_image          = module.ecr.ecr_image_repo
   ecs_family         = "web_ecs"
   container_name     = "web_container"
@@ -86,7 +95,7 @@ module "ecs" {
   ecs_service_name   = "web_ecs_service"
   ecs_subnets        = module.vpc.private_subnet_ids
   ecs_sg             = [module.security_group.ecs_sg_id]
-  blue_ecs_tg_arn    = module.alb.blue_ecs_tg_arn
+  ecs_tg_arn         = module.alb.blue_ecs_tg_arn
   depends_on         = [module.alb]
   log_group_name     = module.cloudwatch_log_group.ecs_log_group
   aws_region         = "us-west-2"
@@ -103,10 +112,10 @@ module "codedeploy" {
   ecs_service_name    = module.ecs.ecs_service_name
   blue_tg             = module.alb.blue_ecs_tg_name
   green_tg            = module.alb.green_ecs_tg_name
-  prod_listener       = module.alb.prod_listener_arn
+  prod_listener       = module.alb.prod_listener_https_arn
   test_listener       = module.alb.test_listener_arn
   codedeploy_iam_role = module.iam_role.codedeploy_role_arn
-  #codedeploy_alarm        = module.cloudwatch_monitoring.codedeploy_alarm_names
+  codedeploy_alert    = module.cloudwatch_monitoring.codedeploy_alert
 }
 
 module "autoscaling" {
@@ -158,4 +167,13 @@ module "cloudwatch_log_group" {
 
   ecs_log_group_name           = "ecs_log_group"
   ecs_log_group_retention_days = 7
+}
+
+module "acm" {
+  source = "./acm"
+
+  # 내가 구입한 도메인명
+  domain_name  = "kim-test.shop"
+  alb_dns_name = module.alb.alb_dns_name
+  alb_zone_id  = module.alb.alb_zone_id
 }

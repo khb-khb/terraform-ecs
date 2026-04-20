@@ -6,12 +6,16 @@ output "blue_ecs_tg_name" {
   value = aws_lb_target_group.blue_tg.name
 }
 
+output "green_ecs_tg_arn" {
+  value = aws_lb_target_group.green_tg.arn
+}
+
 output "green_ecs_tg_name" {
   value = aws_lb_target_group.green_tg.name
 }
 
-output "prod_listener_arn" {
-  value = aws_lb_listener.prod_listener.arn
+output "prod_listener_https_arn" {
+  value = aws_lb_listener.prod_listener_https.arn
 }
 
 output "test_listener_arn" {
@@ -32,4 +36,12 @@ output "blue_tg_arn_suffix" {
 
 output "green_tg_arn_suffix" {
   value = aws_lb_target_group.green_tg.arn_suffix
+}
+
+output "alb_dns_name" {
+  value = aws_lb.this.dns_name
+}
+
+output "alb_zone_id" {
+  value = aws_lb.this.zone_id
 }
