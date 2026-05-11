@@ -1,63 +1,32 @@
-variable "execution_role_arn" {
-  type = string
+variable "aws_ecs_task_definitions" {
+  type = map(object({
+    ecs_family         = string
+    execution_role_arn = string
+    task_role_arn      = string
+    task_cpu           = number
+    task_mem           = number
+    container_name     = string
+    ecs_image          = string
+    log_group_name     = string
+    aws_region         = string
+    container_port     = number
+  }))
 }
 
-variable "ecs_image" {
-  type = string
+variable "aws_ecs_clusters" {
+  type = map(string)
 }
 
-variable "ecs_family" {
-  type = string
-}
-
-variable "container_name" {
-  type = string
-}
-
-variable "container_port" {
-  type = number
-}
-
-variable "ecs_cluster_name" {
-  type = string
-}
-
-variable "ecs_service_name" {
-  type = string
-}
-
-variable "ecs_subnets" {
-  type = list(string)
-}
-
-variable "ecs_sg" {
-  type = list(string)
-}
-
-variable "ecs_tg_arn" {
-  type = string
-}
-
-variable "log_group_name" {
-  type = string
-}
-
-variable "aws_region" {
-  type = string
-}
-
-variable "desired_count" {
-  type = number
-}
-
-variable "task_cpu" {
-  type = string
-}
-
-variable "task_mem" {
-  type = string
-}
-
-variable "task_role_arn" {
-  type = string
+variable "aws_ecs_services" {
+  type = map(object({
+    ecs_service_name    = string
+    cluster_key         = string
+    task_definition_key = string
+    desired_count       = number
+    ecs_subnets         = list(string)
+    security_groups     = list(string)
+    target_group_arn    = string
+    container_name      = string
+    container_port      = number
+  }))
 }

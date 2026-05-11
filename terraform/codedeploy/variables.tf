@@ -1,39 +1,21 @@
-variable "codedeploy_name" {
-  type = string
-}
-
-variable "group_name" {
-  type = string
-}
-
-variable "codedeploy_iam_role" {
-  type = string
-}
-
-variable "ecs_cluster_name" {
-  type = string
-}
-
-variable "ecs_service_name" {
-  type = string
-}
-
-variable "prod_listener" {
-  type = string
-}
-
-variable "test_listener" {
-  type = string
-}
-
-variable "blue_tg" {
-  type = string
-}
-
-variable "green_tg" {
-  type = string
-}
-
 variable "codedeploy_alert" {
   type = list(string)
+}
+
+variable "codedeploy_apps" {
+  type = set(string)
+}
+
+variable "deployment_groups" {
+  type = map(object({
+    deployment_group_name = string
+    apps_key              = string
+    service_role_arn      = string
+    cluster_name          = string
+    service_name          = string
+    prod_listener_arn     = string
+    test_listener_arn     = string
+    prod_tg_name          = string
+    test_tg_name          = string
+  }))
 }

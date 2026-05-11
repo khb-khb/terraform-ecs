@@ -17,3 +17,7 @@ variable "codedeploy_chatbot_role_name" {
 variable "ecs_task_role_name" {
   type = string
 }
+
+variable "db_secret_arn" {
+  type = string
+}

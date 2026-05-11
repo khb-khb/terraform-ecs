@@ -1,30 +1,32 @@
 resource "aws_ecs_task_definition" "this" {
-  family                   = var.ecs_family
+  for_each = var.aws_ecs_task_definitions
+
+  family                   = each.value.ecs_family
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  execution_role_arn       = var.execution_role_arn
-  task_role_arn            = var.task_role_arn
-  cpu                      = var.task_cpu
-  memory                   = var.task_mem
+  execution_role_arn       = each.value.execution_role_arn
+  task_role_arn            = each.value.task_role_arn
+  cpu                      = each.value.task_cpu
+  memory                   = each.value.task_mem
 
   container_definitions = jsonencode([
     {
-      name      = var.container_name
-      image     = var.ecs_image
-      cpu       = tonumber(var.task_cpu)
-      memory    = tonumber(var.task_mem)
+      name      = each.value.container_name
+      image     = each.value.ecs_image
+      cpu       = each.value.task_cpu
+      memory    = each.value.task_mem
       essential = true
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = var.log_group_name
-          awslogs-region        = var.aws_region
+          awslogs-group         = each.value.log_group_name
+          awslogs-region        = each.value.aws_region
           awslogs-stream-prefix = "ecs"
         }
       }
       portMappings = [
         {
-          containerPort = var.container_port
+          containerPort = each.value.container_port
           protocol      = "tcp"
         }
       ]
@@ -33,15 +35,19 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_cluster" "this" {
-  name = var.ecs_cluster_name
+  for_each = var.aws_ecs_clusters
+
+  name = each.value
 
 }
 
 resource "aws_ecs_service" "this" {
-  name                   = var.ecs_service_name
-  cluster                = aws_ecs_cluster.this.id
-  task_definition        = aws_ecs_task_definition.this.arn
-  desired_count          = var.desired_count
+  for_each = var.aws_ecs_services
+
+  name                   = each.value.ecs_service_name
+  cluster                = aws_ecs_cluster.this[each.value.cluster_key].id
+  task_definition        = aws_ecs_task_definition.this[each.value.task_definition_key].arn
+  desired_count          = each.value.desired_count
   launch_type            = "FARGATE"
   enable_execute_command = true
 
@@ -50,14 +56,14 @@ resource "aws_ecs_service" "this" {
   }
 
   network_configuration {
-    subnets          = var.ecs_subnets
-    security_groups  = var.ecs_sg
+    subnets          = each.value.ecs_subnets
+    security_groups  = each.value.security_groups
     assign_public_ip = false
   }
   load_balancer {
-    target_group_arn = var.ecs_tg_arn
-    container_name   = var.container_name
-    container_port   = var.container_port
+    target_group_arn = each.value.target_group_arn
+    container_name   = each.value.container_name
+    container_port   = each.value.container_port
   }
 
   lifecycle {

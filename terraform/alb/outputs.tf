@@ -1,47 +1,63 @@
-output "blue_ecs_tg_arn" {
-  value = aws_lb_target_group.blue_tg.arn
+output "https_listener_arns" {
+  value = {
+    for key, listener in aws_lb_listener.https :
+    key => listener.arn
+  }
 }
 
-output "blue_ecs_tg_name" {
-  value = aws_lb_target_group.blue_tg.name
+output "test_listener_arns" {
+  value = {
+    for key, listener in aws_lb_listener.test :
+    key => listener.arn
+  }
+
 }
 
-output "green_ecs_tg_arn" {
-  value = aws_lb_target_group.green_tg.arn
+output "target_group_arns" {
+  value = {
+    for key, tg in aws_lb_target_group.this :
+    key => tg.arn
+  }
 }
 
-output "green_ecs_tg_name" {
-  value = aws_lb_target_group.green_tg.name
+output "target_group_names" {
+  value = {
+    for key, tg in aws_lb_target_group.this :
+    key => tg.name
+  }
 }
 
-output "prod_listener_https_arn" {
-  value = aws_lb_listener.prod_listener_https.arn
+output "target_group_suffixes" {
+  value = {
+    for key, tg in aws_lb_target_group.this :
+    key => tg.arn_suffix
+  }
 }
 
-output "test_listener_arn" {
-  value = aws_lb_listener.test_listener.arn
+output "alb_dns_names" {
+  value = {
+    for key, alb in aws_lb.this :
+    key => alb.dns_name
+  }
 }
 
-output "alb_name" {
-  value = aws_lb.this.name
+output "alb_zone_ids" {
+  value = {
+    for key, alb in aws_lb.this :
+    key => alb.zone_id
+  }
 }
 
-output "alb_arn_suffix" {
-  value = aws_lb.this.arn_suffix
+output "alb_arns" {
+  value = {
+    for key, alb in aws_lb.this :
+    key => alb.arn
+  }
 }
 
-output "blue_tg_arn_suffix" {
-  value = aws_lb_target_group.blue_tg.arn_suffix
-}
-
-output "green_tg_arn_suffix" {
-  value = aws_lb_target_group.green_tg.arn_suffix
-}
-
-output "alb_dns_name" {
-  value = aws_lb.this.dns_name
-}
-
-output "alb_zone_id" {
-  value = aws_lb.this.zone_id
+output "alb_arn_suffixes" {
+  value = {
+    for key, alb in aws_lb.this :
+    key => alb.arn_suffix
+  }
 }

@@ -1,10 +1,14 @@
 resource "aws_ecr_repository" "this" {
-  name                 = var.name
+  for_each = var.ecr_repos
+
+  name                 = each.value
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
     scan_on_push = true
   }
 
-  tags = var.tags
+  tags = {
+    Name = each.value
+  }
 }

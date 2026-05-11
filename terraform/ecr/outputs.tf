@@ -1,3 +1,6 @@
-output "ecr_image_repo" {
-  value = "${aws_ecr_repository.this.repository_url}:latest"
+output "ecr_image_repo_urls" {
+  value = {
+    for key, repo in aws_ecr_repository.this :
+    key => repo.repository_url
+  }
 }

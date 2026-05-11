@@ -1,13 +1,17 @@
-resource "aws_codedeploy_app" "ecs" {
-  name             = var.codedeploy_name
+resource "aws_codedeploy_app" "this" {
+  for_each = var.codedeploy_apps
+
+  name             = each.key
   compute_platform = "ECS"
 
 }
 
 resource "aws_codedeploy_deployment_group" "ecs_group" {
-  app_name              = aws_codedeploy_app.ecs.name
-  deployment_group_name = var.group_name
-  service_role_arn      = var.codedeploy_iam_role
+  for_each = var.deployment_groups
+
+  app_name              = aws_codedeploy_app.this[each.value.apps_key].name
+  deployment_group_name = each.value.deployment_group_name
+  service_role_arn      = each.value.service_role_arn
 
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
 
@@ -17,23 +21,23 @@ resource "aws_codedeploy_deployment_group" "ecs_group" {
   }
 
   ecs_service {
-    cluster_name = var.ecs_cluster_name
-    service_name = var.ecs_service_name
+    cluster_name = each.value.cluster_name
+    service_name = each.value.service_name
   }
 
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = [var.prod_listener]
+        listener_arns = [each.value.prod_listener_arn]
       }
       test_traffic_route {
-        listener_arns = [var.test_listener]
+        listener_arns = [each.value.test_listener_arn]
       }
       target_group {
-        name = var.blue_tg
+        name = each.value.prod_tg_name
       }
       target_group {
-        name = var.green_tg
+        name = each.value.test_tg_name
       }
     }
   }

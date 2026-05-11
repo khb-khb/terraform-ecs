@@ -2,10 +2,14 @@ variable "domain_name" {
   type = string
 }
 
-variable "alb_dns_name" {
+variable "san_domain_name" {
+  type = list(string)
+}
+
+variable "cdn_domain_name" {
   type = string
 }
 
-variable "alb_zone_id" {
-  type = string
+variable "cdn_san_domain_name" {
+  type = list(string)
 }

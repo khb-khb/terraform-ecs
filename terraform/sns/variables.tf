@@ -38,10 +38,6 @@ variable "codedeploy_slack_channel_id" {
   type = string
 }
 
-variable "codedeploy_noti_rule_name" {
-  type = string
-}
-
-variable "codedeploy_ecs_group_arn" {
-  type = string
+variable "codedeploy_ecs_group_arns" {
+  type = map(string)
 }

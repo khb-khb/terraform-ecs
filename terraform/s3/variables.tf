@@ -1,3 +1,3 @@
-variable "ecr_repos" {
+variable "buckets" {
   type = map(string)
 }

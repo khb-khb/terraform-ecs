@@ -55,9 +55,11 @@ resource "aws_sns_topic_policy" "codedeploy_noti" {
 }
 
 resource "aws_codestarnotifications_notification_rule" "codedeploy_noti_rule" {
-  name        = var.codedeploy_noti_rule_name
+  for_each = var.codedeploy_ecs_group_arns
+
+  name        = "${each.key}-codedeploy-noti-rule"
   detail_type = "FULL"
-  resource    = var.codedeploy_ecs_group_arn
+  resource    = each.value
   status      = "ENABLED"
   event_type_ids = [
     "codedeploy-application-deployment-started",

@@ -1,7 +1,6 @@
-variable "ecs_log_group_name" {
-  type = string
-}
-
-variable "ecs_log_group_retention_days" {
-  type = number
+variable "ecs_log_groups" {
+  type = mapobject({
+    log_group_name = string
+    retention_days = number
+  })
 }

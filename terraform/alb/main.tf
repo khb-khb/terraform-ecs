@@ -1,26 +1,30 @@
 resource "aws_lb" "this" {
-  name               = var.lb_name
+  for_each = var.aws_lbs
+
+  name               = each.value.lb_name
   internal           = false
   load_balancer_type = "application"
-  security_groups    = var.alb_sg
-  subnets            = var.subnets
+  security_groups    = each.value.security_groups
+  subnets            = each.value.subnets
 
   enable_deletion_protection = false
 
-  tags = { Name = var.lb_name }
+  tags = { Name = each.value.lb_name }
 
 }
 
-resource "aws_lb_target_group" "blue_tg" {
-  name        = var.blue_tg_name
-  port        = var.tg_port
-  protocol    = var.tg_protocol
+resource "aws_lb_target_group" "this" {
+  for_each = var.target_groups
+
+  name        = each.value.tg_name
+  port        = each.value.tg_port
+  protocol    = each.value.tg_protocol
   target_type = "ip"
   vpc_id      = var.tg_vpc_id
 
   health_check {
-    path                = var.health_check_path
-    protocol            = var.tg_protocol
+    path                = each.value.health_check_path
+    protocol            = each.value.tg_protocol
     matcher             = "200"
     interval            = 30
     timeout             = 5
@@ -32,14 +36,15 @@ resource "aws_lb_target_group" "blue_tg" {
     create_before_destroy = true
   }
 
-  tags = { Name = var.blue_tg_name }
-
+  tags = { Name = each.value.tg_name }
 }
 
-resource "aws_lb_listener" "prod_listener_http" {
-  load_balancer_arn = aws_lb.this.arn
-  port              = var.prod_listener_http_port
-  protocol          = var.prod_listener_http_protocol
+resource "aws_lb_listener" "http" {
+  for_each = var.aws_lbs
+
+  load_balancer_arn = aws_lb.this[each.key].arn
+  port              = var.http_port
+  protocol          = var.http_protocol
 
   default_action {
     type = "redirect"
@@ -60,17 +65,19 @@ resource "aws_lb_listener" "prod_listener_http" {
   }
 }
 
-resource "aws_lb_listener" "prod_listener_https" {
-  load_balancer_arn = aws_lb.this.arn
-  port              = var.prod_listener_https_port
-  protocol          = var.prod_listener_https_protocol
+resource "aws_lb_listener" "https" {
+  for_each = var.aws_lbs
+
+  load_balancer_arn = aws_lb.this[each.key].arn
+  port              = var.https_port
+  protocol          = var.https_protocol
   ssl_policy        = var.ssl_policy
   certificate_arn   = var.certificate_arn
 
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.blue_tg.arn
+    target_group_arn = aws_lb_target_group.this[each.value.blue_tg_key].arn
   }
   lifecycle {
     # apply(값 변경 상황) / destroy 시 리소스 삭제를 막기 때문에 apply 시에는 활성화, destroy 시에는 주석
@@ -81,40 +88,17 @@ resource "aws_lb_listener" "prod_listener_https" {
   }
 }
 
+# 8080 port listener
+resource "aws_lb_listener" "test" {
+  for_each = var.aws_lbs
 
-resource "aws_lb_target_group" "green_tg" {
-  name        = var.green_tg_name
-  port        = var.tg_port
-  protocol    = var.tg_protocol
-  target_type = "ip"
-  vpc_id      = var.tg_vpc_id
-
-  health_check {
-    path                = var.health_check_path
-    protocol            = var.tg_protocol
-    matcher             = "200"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = { Name = var.green_tg_name }
-
-}
-
-resource "aws_lb_listener" "test_listener" {
-  load_balancer_arn = aws_lb.this.arn
-  port              = var.test_listener_port
-  protocol          = var.test_listener_protocol
+  load_balancer_arn = aws_lb.this[each.key].arn
+  port              = var.test_port
+  protocol          = var.test_protocol
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.green_tg.arn
+    target_group_arn = aws_lb_target_group.this[each.value.green_tg_key].arn
   }
 
   lifecycle {
