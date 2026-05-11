@@ -1,6 +1,3 @@
-FROM node:20-alpine AS
-
-
 FROM nginx:alpine
 
 COPY ./deploy/nginx_conf/nginx.conf /etc/nginx/nginx.conf
