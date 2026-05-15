@@ -7,6 +7,7 @@
   "cpu": "256",
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::378225464216:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::378225464216:role/webTaskRole",
   "containerDefinitions": [
     {
       "name": "web_container",
