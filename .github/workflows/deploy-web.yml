@@ -7,6 +7,9 @@ on:
       - "deploy/web/**"
       - "deploy/Dockerfile.web"
       - ".github/workflows/deploy-web.yml"
+      - "deploy/conf.d/web.conf"
+      - "deploy/conf.d/default.conf"
+      - "deploy/nginx_conf/nginx.conf"
 
 permissions:
   id-token: write  # AWS OIDC 토큰 생성 허용

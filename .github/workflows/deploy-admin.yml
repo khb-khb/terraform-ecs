@@ -7,6 +7,9 @@ on:
       - "deploy/admin/**"
       - "deploy/Dockerfile.admin"
       - ".github/workflows/deploy-admin.yml"
+      - "deploy/conf.d/admin.conf"
+      - "deploy/conf.d/default.conf"
+      - "deploy/nginx_conf/nginx.conf"
 
 permissions:
   # AWS OIDC 토큰 생성 허용
