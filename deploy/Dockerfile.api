@@ -1,5 +1,12 @@
-FROM nginx:alpine
+FROM node:20-alpine
 
-COPY ./deploy/nginx_conf/nginx.conf /etc/nginx/nginx.conf
-COPY ./deploy/conf.d/ /etc/nginx/conf.d/
-COPY ./deploy/html/ /usr/share/nginx/html/
+WORKDIR /app
+
+COPY ./deploy/html/api/package*.json ./
+RUN npm install
+
+COPY ./deploy/html/api/ ./
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
