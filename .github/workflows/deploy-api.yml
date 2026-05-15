@@ -6,7 +6,6 @@ on:
     branches: ["master"]
     paths:
       - "deploy/api/**"
-      - "deploy/Dockerfile.api"
       - ".github/workflows/deploy-api.yml"
 
 permissions:
@@ -19,12 +18,12 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-  ECS_TASK_DEFINITION: deploy/ecs-task-definition-api.json
+  ECS_TASK_DEFINITION: deploy/api/ecs-task-definition-api.json
   ECR_REPO: api
   CONTAINER_NAME: api_container
   CODEDEPLOY_APP: api
   CODEDEPLOY_GROUP: api_group
-  APPSPEC_FILE: deploy/appspec-api.yml
+  APPSPEC_FILE: deploy/api/appspec-api.yml
 
 
 jobs:
@@ -55,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./deploy/Dockerfile.api
+          file: ./deploy/api/Dockerfile.api
           push: true
           tags: |
             ${{env.AWS_ACCOUNT}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPO}}:latest
@@ -87,20 +86,20 @@ jobs:
 
 
       - name: Inject values into task definition
-      # run 에서 terraform output 값을 env 에 저장 후 deploy/ecs-task-definition-api.json 내부의 ${변수} 문자열을 실제 값 으로 치환
+      # run 에서 terraform output 값을 env 에 저장 후 deploy/api/ecs-task-definition-api.json 내부의 ${변수} 문자열을 실제 값 으로 치환
         run: | 
-          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${DB_HOST}|$DB_HOST|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${DB_PORT}|$DB_PORT|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${DB_NAME}|$DB_NAME|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${DB_SECRET_ARN}|$DB_SECRET_ARN|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${UPLOAD_BUCKET_NAME}|$UPLOAD_BUCKET_NAME|g" deploy/ecs-task-definition-api.json
-          sed -i "s|\${UPLOAD_CDN_DOMAIN}|$UPLOAD_CDN_DOMAIN|g" deploy/ecs-task-definition-api.json
+          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${DB_HOST}|$DB_HOST|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${DB_PORT}|$DB_PORT|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${DB_NAME}|$DB_NAME|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${DB_SECRET_ARN}|$DB_SECRET_ARN|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${UPLOAD_BUCKET_NAME}|$UPLOAD_BUCKET_NAME|g" deploy/api/ecs-task-definition-api.json
+          sed -i "s|\${UPLOAD_CDN_DOMAIN}|$UPLOAD_CDN_DOMAIN|g" deploy/api/ecs-task-definition-api.json
 
 
       - name: Check
-        run: cat deploy/ecs-task-definition-api.json
+        run: cat deploy/api/ecs-task-definition-api.json
 
         # Task Definition.json 사용
       - name: Render Amazon ECS task definition-api

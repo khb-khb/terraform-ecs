@@ -2,10 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY ./deploy/html/api/package*.json ./
+COPY ./deploy/api/package*.json ./
 RUN npm install
 
-COPY ./deploy/html/api/ ./
+COPY ./deploy/api/ ./
 
 EXPOSE 3000
 

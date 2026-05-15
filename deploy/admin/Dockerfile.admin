@@ -1,0 +1,8 @@
+FROM nginx:alpine
+
+COPY ./deploy/common/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./deploy/admin/conf.d/admin.conf /etc/nginx/conf.d/admin.conf
+COPY ./deploy/admin/conf.d/default.conf /etc/nginx/conf.d/default.conf
+COPY ./deploy/admin/html/ /usr/share/nginx/html/
+
+EXPOSE 80

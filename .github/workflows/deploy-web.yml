@@ -6,11 +6,7 @@ on:
     branches: ["master"]
     paths:
       - "deploy/web/**"
-      - "deploy/Dockerfile.web"
       - ".github/workflows/deploy-web.yml"
-      - "deploy/conf.d/web.conf"
-      - "deploy/conf.d/default.conf"
-      - "deploy/nginx_conf/nginx.conf"
 
 permissions:
   id-token: write  # AWS OIDC 토큰 생성 허용
@@ -20,12 +16,12 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-  ECS_TASK_DEFINITION: deploy/ecs-task-definition-web.json
+  ECS_TASK_DEFINITION: deploy/web/ecs-task-definition-web.json
   ECR_REPO: web
   CONTAINER_NAME: web_container
   CODEDEPLOY_APP: web
   CODEDEPLOY_GROUP: web_group
-  APPSPEC_FILE: deploy/appspec-web.yml
+  APPSPEC_FILE: deploy/web/appspec-web.yml
 
 
 jobs:
@@ -52,7 +48,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .  # 현재 폴더에 있는 Dockerfile 사용
-          file: ./deploy/Dockerfile.web
+          file: ./deploy/web/Dockerfile.web
           push: true  # ECR 에 Push
           tags: |
             ${{env.AWS_ACCOUNT}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPO}}:latest
@@ -73,11 +69,11 @@ jobs:
 
       - name: Inject values into task definition
         run: | # deploy/ecs-task-definition.json 에서 ${Value} 문자열을 $Value 로 치환
-          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/ecs-task-definition-web.json
-          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/ecs-task-definition-web.json
+          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/web/ecs-task-definition-web.json
+          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/web/ecs-task-definition-web.json
 
       - name: Check
-        run: cat deploy/ecs-task-definition-web.json
+        run: cat deploy/web/ecs-task-definition-web.json
 
   # Task Definition
       - name: Render Amazon ECS task definition-web

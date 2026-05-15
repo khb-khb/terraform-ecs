@@ -6,11 +6,7 @@ on:
     branches: ["master"]
     paths:
       - "deploy/admin/**"
-      - "deploy/Dockerfile.admin"
       - ".github/workflows/deploy-admin.yml"
-      - "deploy/conf.d/admin.conf"
-      - "deploy/conf.d/default.conf"
-      - "deploy/nginx_conf/nginx.conf"
 
 permissions:
   # AWS OIDC 토큰 생성 허용
@@ -22,12 +18,12 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-  ECS_TASK_DEFINITION: deploy/ecs-task-definition-admin.json
+  ECS_TASK_DEFINITION: deploy/admin/ecs-task-definition-admin.json
   ECR_REPO: admin
   CONTAINER_NAME: admin_container
   CODEDEPLOY_APP: admin
   CODEDEPLOY_GROUP: admin_group
-  APPSPEC_FILE: deploy/appspec-admin.yml
+  APPSPEC_FILE: deploy/admin/appspec-admin.yml
 
 
 jobs:
@@ -58,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./deploy/Dockerfile.admin
+          file: ./deploy/admin/Dockerfile.admin
           push: true
           tags: |
             ${{env.AWS_ACCOUNT}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPO}}:latest
@@ -88,18 +84,18 @@ jobs:
 
 
       - name: Inject values into task definition
-      # run 에서 terraform output 값을 env 에 저장 후 deploy/ecs-task-definition-admin.json 내부의 ${변수} 문자열을 실제 값 으로 치환
+      # run 에서 terraform output 값을 env 에 저장 후 deploy/admin/ecs-task-definition-admin.json 내부의 ${변수} 문자열을 실제 값 으로 치환
         run: | 
-          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/ecs-task-definition-admin.json
-          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/ecs-task-definition-admin.json
-          sed -i "s|\${DB_HOST}|$DB_HOST|g" deploy/ecs-task-definition-admin.json
-          sed -i "s|\${DB_PORT}|$DB_PORT|g" deploy/ecs-task-definition-admin.json
-          sed -i "s|\${DB_NAME}|$DB_NAME|g" deploy/ecs-task-definition-admin.json
-          sed -i "s|\${DB_SECRET_ARN}|$DB_SECRET_ARN|g" deploy/ecs-task-definition-admin.json
+          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/admin/ecs-task-definition-admin.json
+          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/admin/ecs-task-definition-admin.json
+          sed -i "s|\${DB_HOST}|$DB_HOST|g" deploy/admin/ecs-task-definition-admin.json
+          sed -i "s|\${DB_PORT}|$DB_PORT|g" deploy/admin/ecs-task-definition-admin.json
+          sed -i "s|\${DB_NAME}|$DB_NAME|g" deploy/admin/ecs-task-definition-admin.json
+          sed -i "s|\${DB_SECRET_ARN}|$DB_SECRET_ARN|g" deploy/admin/ecs-task-definition-admin.json
 
 
       - name: Check
-        run: cat deploy/ecs-task-definition-admin.json
+        run: cat deploy/admin/ecs-task-definition-admin.json
 
         # Task Definition.json 사용
       - name: Render Amazon ECS task definition-admin
