@@ -19,7 +19,7 @@ env:
   ECS_TASK_DEFINITION: deploy/ecs-task-definition-web.json
   ECR_REPO: web
   CONTAINER_NAME: web_container
-  CODEDEPLOY_APP: web_group
+  CODEDEPLOY_APP: web
   CODEDEPLOY_GROUP: web_group
   APPSPEC_FILE: deploy/appspec-web.yml
 
