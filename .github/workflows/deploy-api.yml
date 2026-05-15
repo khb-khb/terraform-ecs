@@ -21,7 +21,7 @@ env:
   ECS_TASK_DEFINITION: deploy/ecs-task-definition-api.json
   ECR_REPO: api
   CONTAINER_NAME: api_container
-  CODEDEPLOY_APP: ecs_codedeploy
+  CODEDEPLOY_APP: api_group
   CODEDEPLOY_GROUP: api_group
   APPSPEC_FILE: deploy/appspec-api.yml
 
