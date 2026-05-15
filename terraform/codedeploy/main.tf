@@ -63,7 +63,7 @@ resource "aws_codedeploy_deployment_group" "ecs_group" {
   }
 
   alarm_configuration {
-    alarms  = var.codedeploy_alert
+    alarms  = [var.codedeploy_alert[each.key]]
     enabled = true
   }
 }

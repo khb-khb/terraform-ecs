@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        WEB SERVICE
+    </title>
+
+    <style>
+        h1 {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #cbd5e1;
+            margin-bottom: 24px;
+        }
+
+        img {
+            width: 300px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <img src="https://assets-s3-kimhb.s3.us-west-2.amazonaws.com/web/web.png">
+
+        <h1>
+            web page
+        </h1>
+        <p>
+            AWS WEP PAGE
+        </p>
+
+        <button onclick="callApi()">
+            호출
+        </button>
+    </div>
+    <script>
+        async function callApi() {
+            try {
+                const response =
+                    await fetch("https://api.kim-test.shop/api/health")
+
+                const data = await response.text()
+
+                document.getElementById("result").innerText =
+                    "API 응답 성공 : " + data
+            } catch (error) {
+                document.getElementById("result").innerText =
+                    "API 호출 실패"
+            }
+        }
+    </script>
+</body>
+
+</html>

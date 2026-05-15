@@ -18,3 +18,10 @@ output "bucket_regional_domain_names" {
     key => bucket.bucket_regional_domain_name
   }
 }
+
+output "bucket_name" {
+  value = {
+    for key, bucket in aws_s3_bucket.this :
+    key => bucket.bucket
+  }
+}

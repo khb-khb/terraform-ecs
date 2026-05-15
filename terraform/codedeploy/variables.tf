@@ -1,5 +1,5 @@
 variable "codedeploy_alert" {
-  type = list(string)
+  type = map(string)
 }
 
 variable "codedeploy_apps" {

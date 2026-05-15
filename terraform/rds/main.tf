@@ -19,6 +19,7 @@ resource "aws_rds_cluster" "this" {
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = var.db_security_group_ids
+  port                   = var.db_port
 
   backup_retention_period = var.backup_retention_period
 

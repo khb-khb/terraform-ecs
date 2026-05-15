@@ -86,13 +86,13 @@ module "alb" {
     }
     api_blue = {
       tg_name           = "api-blue"
-      tg_port           = 80
+      tg_port           = 3000
       tg_protocol       = "HTTP"
       health_check_path = "/api/health"
     }
     api_green = {
       tg_name           = "api-green"
-      tg_port           = 80
+      tg_port           = 3000
       tg_protocol       = "HTTP"
       health_check_path = "/api/health"
     }
@@ -133,9 +133,11 @@ module "security_group" {
     "api"
   ]
 
-  test_sg_cidr = "175.195.248.198/32"
-  db_sg_name   = "db_sg"
-  ecs_sg_name  = "ecs_sg"
+  test_sg_cidr  = "175.195.248.198/32"
+  db_sg_name    = "db_sg"
+  web_sg_name   = "web_sg"
+  api_sg_name   = "api_sg"
+  admin_sg_name = "admin_sg"
 }
 
 module "ecr" {
@@ -154,8 +156,12 @@ module "iam_role" {
   codedeploy_role_name         = "codedeployRole"
   monitoring_chatbot_role_name = "monitoring_chatbotRole"
   codedeploy_chatbot_role_name = "codedeploy_chatbotRole"
-  ecs_task_role_name           = "ecstaskRole"
   db_secret_arn                = module.secret_manager.db_secret_arn
+  web_task_role_name           = "webTaskRole"
+  api_task_role_name           = "apiTaskRole"
+  admin_task_role_name         = "adminTaskRole"
+  api_s3_upload_policy_name    = "api-s3-upload-policy"
+  uploads_bucket_arn           = module.s3.bucket_arns["uploads"]
 }
 
 module "ecs" {
@@ -165,36 +171,36 @@ module "ecs" {
     web = {
       ecs_family         = "web-task"
       execution_role_arn = module.iam_role.ecs_task_execution_role_arn
-      task_role_arn      = module.iam_role.ecs_task_role_arn
+      task_role_arn      = module.iam_role.web_task_role_arn
       task_cpu           = 256
       task_mem           = 512
-      container_name     = "web-ecs-container"
-      ecs_image          = "${module.ecr.ecr_image_repo_urls["web"]}:initial"
-      log_group_name     = module.cloudwatch_log_group.ecs_log_group
+      container_name     = "web_container"
+      ecs_image          = "${module.ecr.ecr_image_repo_urls["web"]}:latest"
+      log_group_name     = module.cloudwatch_log_group.ecs_log_groups["web"]
       aws_region         = "us-west-2"
       container_port     = 80
     }
     api = {
       ecs_family         = "api-task"
       execution_role_arn = module.iam_role.ecs_task_execution_role_arn
-      task_role_arn      = module.iam_role.ecs_task_role_arn
+      task_role_arn      = module.iam_role.api_task_role_arn
       task_cpu           = 256
       task_mem           = 512
-      container_name     = "api-ecs-container"
-      ecs_image          = "${module.ecr.ecr_image_repo_urls["api"]}:initial"
-      log_group_name     = module.cloudwatch_log_group.ecs_log_group
+      container_name     = "api_container"
+      ecs_image          = "${module.ecr.ecr_image_repo_urls["api"]}:latest"
+      log_group_name     = module.cloudwatch_log_group.ecs_log_groups["api"]
       aws_region         = "us-west-2"
-      container_port     = 80
+      container_port     = 3000
     }
     admin = {
       ecs_family         = "admin-task"
       execution_role_arn = module.iam_role.ecs_task_execution_role_arn
-      task_role_arn      = module.iam_role.ecs_task_role_arn
+      task_role_arn      = module.iam_role.admin_task_role_arn
       task_cpu           = 256
       task_mem           = 512
-      container_name     = "admin-ecs-container"
-      ecs_image          = "${module.ecr.ecr_image_repo_urls["admin"]}:initial"
-      log_group_name     = module.cloudwatch_log_group.ecs_log_group
+      container_name     = "admin_container"
+      ecs_image          = "${module.ecr.ecr_image_repo_urls["admin"]}:latest"
+      log_group_name     = module.cloudwatch_log_group.ecs_log_groups["admin"]
       aws_region         = "us-west-2"
       container_port     = 80
     }
@@ -208,33 +214,33 @@ module "ecs" {
       ecs_service_name    = "web-service"
       desired_count       = 1
       ecs_subnets         = module.vpc.private_subnet_ids
-      security_groups     = [module.security_group.ecs_sg_id]
+      security_groups     = [module.security_group.web_sg_id]
       target_group_arn    = module.alb.target_group_arns["web_blue"]
       cluster_key         = "main"
       task_definition_key = "web"
-      container_name      = "web-ecs-container"
+      container_name      = "web_container"
       container_port      = 80
     }
     api = {
       ecs_service_name    = "api-service"
       desired_count       = 1
       ecs_subnets         = module.vpc.private_subnet_ids
-      security_groups     = [module.security_group.ecs_sg_id]
+      security_groups     = [module.security_group.api_sg_id]
       target_group_arn    = module.alb.target_group_arns["api_blue"]
       cluster_key         = "main"
       task_definition_key = "api"
-      container_name      = "api-ecs-container"
-      container_port      = 80
+      container_name      = "api_container"
+      container_port      = 3000
     }
     admin = {
       ecs_service_name    = "admin-service"
       desired_count       = 1
       ecs_subnets         = module.vpc.private_subnet_ids
-      security_groups     = [module.security_group.ecs_sg_id]
+      security_groups     = [module.security_group.admin_sg_id]
       target_group_arn    = module.alb.target_group_arns["admin_blue"]
       cluster_key         = "main"
       task_definition_key = "admin"
-      container_name      = "admin-ecs-container"
+      container_name      = "admin_container"
       container_port      = 80
     }
   }
@@ -282,7 +288,7 @@ module "codedeploy" {
       test_tg_name          = module.alb.target_group_names["admin_green"]
     }
   }
-  codedeploy_alert = [module.cloudwatch_monitoring.codedeploy_alert]
+  codedeploy_alert = module.cloudwatch_monitoring.codedeploy_alert
 }
 
 module "autoscaling" {
@@ -472,6 +478,7 @@ module "rds" {
   db_username             = var.db_username
   db_password             = var.db_password
   db_security_group_ids   = [module.security_group.db_sg_id]
+  db_port                 = 3306
   skip_final_snapshot     = true
   backup_retention_period = 7
 

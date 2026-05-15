@@ -1,8 +1,12 @@
-name: Build and Push to ECR
+name: Deploy web
 
 on:
   push:
-    branches: ["master"]  # 브랜치 아직 모르면 일단 전체. 나중에 ["main"]로 좁히기
+    branches: ["master"]
+    paths:
+      - "deploy/web/**"
+      - "deploy/Dockerfile.web"
+      - ".github/workflows/deploy-web.yml"
 
 permissions:
   id-token: write  # AWS OIDC 토큰 생성 허용
@@ -12,21 +16,24 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-  ECR_REPO: ${{ secrets.ECR_REPO }}
-  DB_NAME: ${{ secrets.DB_NAME }}
-  ECS_TASK_DEFINITION: deploy/ecs-task-definition.json
+  ECS_TASK_DEFINITION: deploy/ecs-task-definition-web.json
+  ECR_REPO: web
   CONTAINER_NAME: web_container
   CODEDEPLOY_APP: ecs_codedeploy
-  CODEDEPLOY_GROUP: codedeploy
-  APPSPEC_FILE: deploy/appspec.yml
+  CODEDEPLOY_GROUP: web_group
+  APPSPEC_FILE: deploy/appspec-web.yml
 
 
 jobs:
   build:
     runs-on: ubuntu-latest  # github 가 제공하는 가상 머신, docker 빌드가 실행됨
+
     steps:
       - name: Checkout  # github repo 코드를 가상 머신에 다운로드
         uses: actions/checkout@v4
+
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v3
 
       - name: Configure AWS credentials (OIDC)  # AWS OIDC 인증
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,6 +48,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .  # 현재 폴더에 있는 Dockerfile 사용
+          file: ./deploy/Dockerfile.web
           push: true  # ECR 에 Push
           tags: |
             ${{env.AWS_ACCOUNT}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPO}}:latest
@@ -53,31 +61,22 @@ jobs:
 
       - name: get terraform outputs
         id: tf
-        working-directory: ./terraform # git repo terraform dir
-        run: | # terraform root main.tf 의 output 값을 가져온다 / 대문자 - 환경 변수 / 소문자 - 다른 action, step 에서 참조
-          echo "LOG_GROUP=$(terraform output -raw ecs_log_group)" >> $GITHUB_ENV
-          echo "ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_ENV
-          echo "ECS_SERVICE=$(terraform output -raw ecs_service_name)" >> $GITHUB_ENV
-          echo "DB_HOST=$(terraform output -raw rds_writer_endpoint)" >> $GITHUB_ENV
-          echo "DB_SECRET_ARN=$(terraform output -raw db_secret_arn)" >> $GITHUB_ENV
-
-          echo "ecs_cluster=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
-          echo "ecs_service=$(terraform output -raw ecs_service_name)" >> $GITHUB_OUTPUT
+        working-directory: ./terraform
+        run: | # terraform root main.tf 의 output 값을 가져온다
+          echo "LOG_GROUP=$(terraform output -json ecs_log_groups | jq -r '.web')" >> $GITHUB_ENV
+          echo "ecs_cluster=$(terraform output -json ecs_cluster_names | jq -r '.main')" >> $GITHUB_OUTPUT
+          echo "ecs_service=$(terraform output -json ecs_service_names | jq -r '.web')" >> $GITHUB_OUTPUT
 
       - name: Inject values into task definition
         run: | # deploy/ecs-task-definition.json 에서 ${Value} 문자열을 $Value 로 치환
-          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/ecs-task-definition.json
-          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/ecs-task-definition.json
-          sed -i "s|\${DB_HOST}|$DB_HOST|g" deploy/ecs-task-definition.json
-          sed -i "s|\${DB_PORT}|3306|g" deploy/ecs-task-definition.json
-          sed -i "s|\${DB_NAME}|$DB_NAME|g" deploy/ecs-task-definition.json
-          sed -i "s|\${DB_SECRET_ARN}|$DB_SECRET_ARN|g" deploy/ecs-task-definition.json
+          sed -i "s|\${LOG_GROUP}|$LOG_GROUP|g" deploy/ecs-task-definition-web.json
+          sed -i "s|\${AWS_REGION}|$AWS_REGION|g" deploy/ecs-task-definition-web.json
 
       - name: Check
-        run: cat deploy/ecs-task-definition.json
+        run: cat deploy/ecs-task-definition-web.json
 
   # Task Definition
-      - name: Render Amazon ECS task definition
+      - name: Render Amazon ECS task definition-web
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:

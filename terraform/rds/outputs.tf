@@ -16,3 +16,11 @@ output "rds_writer_endpoint" {
 output "rds_reader_endpoint" {
   value = aws_rds_cluster.this.reader_endpoint
 }
+
+output "db_name" {
+  value = aws_rds_cluster.this.database_name
+}
+
+output "db_port" {
+  value = aws_rds_cluster.this.port
+}

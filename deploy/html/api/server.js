@@ -1,6 +1,8 @@
 import express from "express";
 import multer from "multer";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import cors from "cors";
+import mysql from "mysql2/promise";
 
 const app = express();
 const upload = multer();
@@ -12,7 +14,18 @@ const s3 = new S3Client({
 const BUCKET_NAME = process.env.UPLOAD_BUCKET_NAME;
 const CDN_DOMAIN = process.env.UPLOAD_CDN_DOMAIN || "https://uploads.kim-test.shop";
 
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.use(cors({
+  origin: [
+    "https://kim-test.shop",
+    "https://admin.kim-test.shop"
+  ]
+}));
+
+app.get("/api/health", (req, res) => {
+  res.status(200).send("ok");
+});
+
+app.post("/api/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "file is required" });
@@ -37,6 +50,36 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "upload failed" });
+  }
+});
+
+app.get("/api/admin/db-check", async (req, res) => {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT || 3306),
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    const [rows] = await connection.execute(
+      "SELECT DATABASE() AS db_name, NOW() AS current_time"
+    );
+
+    await connection.end();
+
+    res.json({
+      status: "ok",
+      result: rows[0]
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      status: "error",
+      message: "DB 조회 실패"
+    });
   }
 });
 

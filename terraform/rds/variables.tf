@@ -46,6 +46,10 @@ variable "engine" {
   type = string
 }
 
+variable "db_port" {
+  type = number
+}
+
 variable "instance_count" {
   type    = number
   default = 1

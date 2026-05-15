@@ -1,5 +1,5 @@
 {
-  "family": "web_ecs",
+  "family": "admin_ecs",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
@@ -9,7 +9,7 @@
   "executionRoleArn": "arn:aws:iam::378225464216:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "web_container",
+      "name": "admin_container",
       "image": "sample-image",
       "essential": true,
       "portMappings": [
@@ -26,7 +26,7 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
-      "environ ment": [
+      "environment": [
         {
           "name": "DB_HOST",
           "value": "${DB_HOST}"

@@ -114,17 +114,95 @@ resource "aws_iam_role_policy_attachment" "codedeploy_chatbot_role_policy" {
 }
 
 # ecs task role - 컨테이너 (앱) 가 실행 중 사용하는 역할 // s3, sqs, sns 등 서비스 사용
-resource "aws_iam_role" "ecs_task_role" {
-  name               = var.ecs_task_role_name
+
+# web task role
+resource "aws_iam_role" "web_task_role" {
+  name               = var.web_task_role_name
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
 
   tags = {
-    Name = var.ecs_task_role_name
+    Name = var.web_task_role_name
   }
 }
-resource "aws_iam_role_policy" "ecs_task_exec_policy" {
-  name = "ecs-task-exec-policy"
-  role = aws_iam_role.ecs_task_role.id
+resource "aws_iam_role_policy" "web_task_exec_policy" {
+  name = var.web_task_role_name
+  role = aws_iam_role.web_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# api task role
+resource "aws_iam_role" "api_task_role" {
+  name               = var.api_task_role_name
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
+
+  tags = {
+    Name = var.api_task_role_name
+  }
+}
+resource "aws_iam_role_policy" "api_task_exec_policy" {
+  name = var.api_task_role_name
+  role = aws_iam_role.api_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "api_s3_upload_policy" {
+  name = var.api_s3_upload_policy_name
+  role = aws_iam_role.api_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = "${var.uploads_bucket_arn}/*"
+      }
+    ]
+  })
+}
+
+# admin task role
+resource "aws_iam_role" "admin_task_role" {
+  name               = var.admin_task_role_name
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
+
+  tags = {
+    Name = var.admin_task_role_name
+  }
+}
+resource "aws_iam_role_policy" "admin_task_exec_policy" {
+  name = var.admin_task_role_name
+  role = aws_iam_role.admin_task_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"

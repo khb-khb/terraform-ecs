@@ -5,8 +5,16 @@ output "alb_sg_ids" {
   }
 }
 
-output "ecs_sg_id" {
-  value = aws_security_group.ecs_sg.id
+output "web_sg_id" {
+  value = aws_security_group.web_sg.id
+}
+
+output "api_sg_id" {
+  value = aws_security_group.api_sg.id
+}
+
+output "admin_sg_id" {
+  value = aws_security_group.admin_sg.id
 }
 
 output "db_sg_id" {

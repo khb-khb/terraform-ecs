@@ -14,9 +14,25 @@
     <div>
         <h1>Admin Dashboard</h1>
     </div>
-    <div>
-        AWS Admin page 입니다.
-    </div>
+    <p> AWS Admin Page 입니다.</p>
+    <button onclick="checkDb()"> DB 조회 테스트 </button>
+    <pre id="result"></pre>
+
+    <script>
+        async function checkDb() {
+            try {
+                const res = await fetch("https://api.kim-test.shop/api/admin/db-check");
+                const data = await res.json();
+
+                document.getElementById("result").innerText =
+                    JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById("result").innerText = "DB 조회 실패";
+            }
+        }
+    </script>
+
+
 </body>
 
 </html>

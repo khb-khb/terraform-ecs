@@ -1,0 +1,63 @@
+{
+  "family": "api_ecs",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::378225464216:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "api_container",
+      "image": "sample-image",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [
+        {
+          "name": "DB_HOST",
+          "value": "${DB_HOST}"
+        },
+        {
+          "name": "DB_PORT",
+          "value": "${DB_PORT}"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "${DB_NAME}"
+        },
+        {
+          "name": "UPLOAD_BUCKET_NAME",
+          "value": "${UPLOAD_BUCKET_NAME}"
+        },
+        {
+          "name": "UPLOAD_CDN_DOMAIN",
+          "value": "${UPLOAD_CDN_DOMAIN}"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_USER",
+          "valueFrom": "${DB_SECRET_ARN}:db_username::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "${DB_SECRET_ARN}:db_password::"
+        }
+      ]
+    }
+  ]
+}

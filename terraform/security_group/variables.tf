@@ -11,10 +11,18 @@ variable "test_sg_cidr" {
 }
 
 
-variable "ecs_sg_name" {
+variable "web_sg_name" {
   type = string
 }
 
 variable "db_sg_name" {
+  type = string
+}
+
+variable "api_sg_name" {
+  type = string
+}
+
+variable "admin_sg_name" {
   type = string
 }
