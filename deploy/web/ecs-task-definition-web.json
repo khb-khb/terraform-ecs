@@ -1,5 +1,5 @@
 {
-  "family": "web_ecs",
+  "family": "web-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"

@@ -1,5 +1,5 @@
 {
-  "family": "api_ecs",
+  "family": "api-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"

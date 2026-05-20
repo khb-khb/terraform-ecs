@@ -1,5 +1,5 @@
 {
-  "family": "admin_ecs",
+  "family": "admin-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
