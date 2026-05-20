@@ -26,3 +26,6 @@ output "admin_task_role_arn" {
   value = aws_iam_role.admin_task_role.arn
 }
 
+output "bastion_iam_profile_name" {
+  value = aws_iam_instance_profile.bastion_profile.name
+}

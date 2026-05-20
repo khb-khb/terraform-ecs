@@ -95,6 +95,14 @@ resource "aws_vpc_security_group_ingress_rule" "admin_db_ingress_sg" {
   ip_protocol                  = "tcp"
 }
 
+resource "aws_vpc_security_group_ingress_rule" "bastion_ingress_sg" {
+  security_group_id            = aws_security_group.db_sg.id
+  referenced_security_group_id = aws_security_group.bastion_sg.id
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
+}
+
 resource "aws_vpc_security_group_egress_rule" "db_egress_sg" {
   security_group_id = aws_security_group.db_sg.id
   cidr_ipv4         = "0.0.0.0/0"
@@ -143,6 +151,21 @@ resource "aws_vpc_security_group_ingress_rule" "alb_admin_ingress_sg" {
 
 resource "aws_vpc_security_group_egress_rule" "admin_egress_sg" {
   security_group_id = aws_security_group.admin_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
+# bastion sg
+resource "aws_security_group" "bastion_sg" {
+  name   = var.bastion_sg_name
+  vpc_id = var.vpc_id
+  tags = {
+    Name = var.bastion_sg_name
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "bastion_egress_sg" {
+  security_group_id = aws_security_group.bastion_sg.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
 }

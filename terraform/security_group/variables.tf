@@ -26,3 +26,7 @@ variable "api_sg_name" {
 variable "admin_sg_name" {
   type = string
 }
+
+variable "bastion_sg_name" {
+  type = string
+}

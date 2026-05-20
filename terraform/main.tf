@@ -133,11 +133,12 @@ module "security_group" {
     "api"
   ]
 
-  test_sg_cidr  = "175.195.248.198/32"
-  db_sg_name    = "db_sg"
-  web_sg_name   = "web_sg"
-  api_sg_name   = "api_sg"
-  admin_sg_name = "admin_sg"
+  test_sg_cidr    = "175.195.248.198/32"
+  db_sg_name      = "db_sg"
+  web_sg_name     = "web_sg"
+  api_sg_name     = "api_sg"
+  admin_sg_name   = "admin_sg"
+  bastion_sg_name = "bastion_sg"
 }
 
 module "ecr" {
@@ -511,4 +512,15 @@ module "cloudfront" {
   uploads_bucket_arn                  = module.s3.bucket_arns["uploads"]
 
   acm_certificate_arn = module.acm.cdn_certificate_arn
+}
+
+module "ec2" {
+  source = "./ec2"
+
+  ec2_name      = "bastion_ec2"
+  ec2_ami_id    = "ami-00563078bca04e287"
+  instance_type = "t3.micro"
+  subnet_id     = module.vpc.public_subnet_ids[0]
+  sg_id         = [module.security_group.bastion_sg_id]
+  iam           = module.iam_role.bastion_iam_profile_name
 }
