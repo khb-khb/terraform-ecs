@@ -131,6 +131,12 @@ app.get("/api/admin/uploads", async (req, res) => {
   }
 });
 
+app.get("/api/error-test", (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "intentional 5xx test"
+  });
+});
 
 app.listen(3000, () => {
   console.log("upload api running on port 3000");

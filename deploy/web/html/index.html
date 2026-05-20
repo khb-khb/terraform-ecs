@@ -52,6 +52,7 @@
         <input type="email" id="email" placeholder="이메일">
         <input type="file" id="file" accept="image/*">
         <button onclick="uploadFile()">업로드</button>
+        <button onclick="errorTest()">5XX 장애 테스트</button>
 
         <pre id="result"></pre>
 
@@ -91,6 +92,26 @@
                     }
                 } catch (error) {
                     document.getElementById("result").innerText = "업로드 실패";
+                }
+            }
+
+
+            async function errorTest() {
+                try {
+                    const response = await fetch("https://api.kim-test.shop/api/error-test");
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        document.getElementById("result").innerText =
+                            "5XX 장애 테스트 발생";
+                        return;
+                    }
+
+                    document.getElementById("result").innerText =
+                        JSON.stringify(data, null, 2);
+                } catch (error) {
+                    document.getElementById("result").innerText =
+                        "장애 테스트 호출 실패";
                 }
             }
         </script>
