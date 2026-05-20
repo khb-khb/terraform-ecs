@@ -49,13 +49,13 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx_high" {
 
   alarm_name          = "${each.key}-alb-5xx"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  datapoints_to_alarm = 1
+  evaluation_periods  = 2
+  datapoints_to_alarm = 2
   metric_name         = "HTTPCode_Target_5XX_Count"
   namespace           = "AWS/ApplicationELB"
   period              = 60
   statistic           = "Sum"
-  threshold           = 0
+  threshold           = 5
   alarm_description   = "Target is returning 5XX responses"
   treat_missing_data  = "notBreaching"
 

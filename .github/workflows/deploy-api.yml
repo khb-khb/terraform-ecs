@@ -79,7 +79,7 @@ jobs:
           echo "DB_NAME=$(terraform output -raw db_name)" >> $GITHUB_ENV
           echo "DB_PORT=$(terraform output -raw db_port)" >> $GITHUB_ENV
           echo "UPLOAD_BUCKET_NAME=$(terraform output -raw uploads_bucket_name)" >> $GITHUB_ENV
-          echo "UPLOAD_CDN_DOMAIN=$(terraform output -raw uploads_cdn_domain)" >> $GITHUB_ENV
+          echo "UPLOAD_CDN_DOMAIN=$(terraform output -raw uploads_cdn_url)" >> $GITHUB_ENV
 
           echo "ecs_cluster=$(terraform output -json ecs_cluster_names | jq -r '.main')" >> $GITHUB_OUTPUT
           echo "ecs_service=$(terraform output -json ecs_service_names | jq -r '.api')" >> $GITHUB_OUTPUT

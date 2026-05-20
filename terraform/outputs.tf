@@ -30,6 +30,7 @@ output "uploads_bucket_name" {
   value = module.s3.bucket_name["uploads"]
 }
 
-output "uploads_cdn_domain" {
-  value = module.cloudfront.cloudfront_domain_names["uploads"]
+output "uploads_cdn_url" {
+  value = "https://uploads.kim-test.shop"
 }
+
