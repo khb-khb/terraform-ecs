@@ -32,12 +32,30 @@
                 }
 
                 const html = data.result.map(item => `
-                <div style="border:1px solid #ddd; padding:12px; margin:12px 0;">
-                    <p><b>계정명:</b> ${item.username}</p>
-                    <p><b>이메일:</b> ${item.email}</p>
-                    <p><b>업로드 시간:</b> ${new Date(item.created_at).toLocaleString("ko-KR")}</p>
-                    <img src="${item.image_url}" style="width:200px; border-radius:8px;">
-                </div>
+                    <div style="
+                    border:1px solid #ddd;
+    padding:20px;
+    margin:20px 0;
+    display:flex;
+    align-items:center;
+    gap:24px;
+">
+
+
+        <div>
+            <p><b>계정명:</b> ${item.username}</p>
+            <p><b>이메일:</b> ${item.email}</p>
+            <p><b>업로드 시간:</b>
+                ${new Date(item.created_at).toLocaleString("ko-KR")}
+            </p>
+        </div>
+                <img src="${item.image_url}" style="
+            width:220px;
+            height:220px;
+            object-fit:cover;
+            border-radius:12px;
+        ">
+    </div>
             `).join("");
 
                 document.getElementById("uploads").innerHTML = html || "업로드된 데이터가 없습니다.";
