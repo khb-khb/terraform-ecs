@@ -122,7 +122,7 @@ app.get("/api/admin/uploads", async (req, res) => {
 
     res.status(500).json({
       status: "error",
-      message: "업로드 목록 조회 실패"
+      message: " 업로드 목록 조회 실패 "
     });
   } finally {
     if (connection) {
