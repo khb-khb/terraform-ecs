@@ -64,7 +64,7 @@ app.get("/api/admin/db-check", async (req, res) => {
     });
 
     const [rows] = await connection.execute(
-      "SELECT DATABASE() AS db_name, NOW() AS current_time"
+      "SELECT DATABASE() AS db_name, NOW() AS server_time"
     );
 
     await connection.end();

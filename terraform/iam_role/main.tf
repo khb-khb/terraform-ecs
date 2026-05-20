@@ -39,7 +39,7 @@ resource "aws_iam_role_policy" "ecs_execution_secrets_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = var.db_secret_arn
+        Resource = "${var.db_secret_arn}*"
       }
     ]
   })
