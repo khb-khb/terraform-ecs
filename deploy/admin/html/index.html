@@ -16,19 +16,33 @@
         <h1>Admin Dashboard</h1>
     </div>
     <p> AWS Admin Page 입니다.</p>
-    <button onclick="checkDb()"> DB 조회 테스트 </button>
-    <pre id="result"></pre>
+    <button onclick="loadUploads()">업로드 목록 조회</button>
+
+    <div id="uploads"></div>
 
     <script>
-        async function checkDb() {
+        async function loadUploads() {
             try {
-                const res = await fetch("https://api.kim-test.shop/api/admin/db-check");
+                const res = await fetch("https://api.kim-test.shop/api/admin/uploads");
                 const data = await res.json();
 
-                document.getElementById("result").innerText =
-                    JSON.stringify(data, null, 2);
+                if (!res.ok || data.status !== "ok") {
+                    document.getElementById("uploads").innerText = "업로드 목록 조회 실패";
+                    return;
+                }
+
+                const html = data.result.map(item => `
+                <div style="border:1px solid #ddd; padding:12px; margin:12px 0;">
+                    <p><b>계정명:</b> ${item.username}</p>
+                    <p><b>이메일:</b> ${item.email}</p>
+                    <p><b>업로드 시간:</b> ${new Date(item.created_at).toLocaleString("ko-KR")}</p>
+                    <img src="${item.image_url}" style="width:200px; border-radius:8px;">
+                </div>
+            `).join("");
+
+                document.getElementById("uploads").innerHTML = html || "업로드된 데이터가 없습니다.";
             } catch (err) {
-                document.getElementById("result").innerText = "DB 조회 실패";
+                document.getElementById("uploads").innerText = "업로드 목록 조회 실패";
             }
         }
     </script>

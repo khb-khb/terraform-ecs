@@ -83,13 +83,21 @@
 
                     const data = await response.json();
 
-                    document.getElementById("result").innerText =
-                        JSON.stringify(data, null, 2);
+                    if (response.ok && data.status === "ok") {
+                        document.getElementById("result").innerText = "업로드 완료";
+
+                        document.getElementById("username").value = "";
+                        document.getElementById("email").value = "";
+                        document.getElementById("file").value = "";
+                    } else {
+                        document.getElementById("result").innerText = "업로드 실패";
+                    }
                 } catch (error) {
                     document.getElementById("result").innerText = "업로드 실패";
                 }
             }
         </script>
+    </div>
 </body>
 
 </html>
