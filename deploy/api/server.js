@@ -17,6 +17,7 @@ const CDN_DOMAIN = process.env.UPLOAD_CDN_DOMAIN || "https://uploads.kim-test.sh
 app.use(cors({
   origin: [
     "https://kim-test.shop",
+    "https://www.kim-test.shop",
     "https://admin.kim-test.shop"
   ]
 }));
@@ -26,9 +27,15 @@ app.get("/api/health", (req, res) => {
 });
 
 app.post("/api/upload", upload.single("file"), async (req, res) => {
+  let connection;
+
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "file is required" });
+    const { username, email } = req.body;
+
+    if (!username || !email || !req.file) {
+      return res.status(400).json({
+        message: "username, email, file are required"
+      });
     }
 
     const key = `www/${Date.now()}-${req.file.originalname}`;
@@ -42,20 +49,55 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
       })
     );
 
-    res.json({
-      message: "upload success",
-      key,
-      url: `${CDN_DOMAIN}/${key}`
+    const imageUrl = `${CDN_DOMAIN}/${key}`;
+
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT || 3306),
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
     });
+
+    await connection.execute(
+      `
+      INSERT INTO user_uploads
+      (username, email, image_key, image_url)
+      VALUES (?, ?, ?, ?)
+      `,
+      [username, email, key, imageUrl]
+    );
+
+    res.json({
+      status: "ok",
+      message: "upload success",
+      result: {
+        username,
+        email,
+        imageUrl
+      }
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "upload failed" });
+
+    res.status(500).json({
+      status: "error",
+      message: "upload failed"
+    });
+
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 });
 
-app.get("/api/admin/db-check", async (req, res) => {
+app.get("/api/admin/uploads", async (req, res) => {
+  let connection;
+
   try {
-    const connection = await mysql.createConnection({
+    connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT || 3306),
       user: process.env.DB_USER,
@@ -64,24 +106,31 @@ app.get("/api/admin/db-check", async (req, res) => {
     });
 
     const [rows] = await connection.execute(
-      "SELECT DATABASE() AS db_name, NOW() AS server_time"
+      `
+      SELECT id, username, email, image_url, created_at
+      FROM user_uploads
+      ORDER BY created_at DESC
+      `
     );
-
-    await connection.end();
 
     res.json({
       status: "ok",
-      result: rows[0]
+      result: rows
     });
   } catch (err) {
     console.error(err);
 
     res.status(500).json({
       status: "error",
-      message: "DB 조회 실패"
+      message: "업로드 목록 조회 실패"
     });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 });
+
 
 app.listen(3000, () => {
   console.log("upload api running on port 3000");
