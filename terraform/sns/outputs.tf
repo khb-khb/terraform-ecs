@@ -1,4 +1,4 @@
-output "monitorig_sns_topic_arn" {
+output "monitoring_sns_topic_arn" {
   value = aws_sns_topic.monitoring_alert.arn
 }
 

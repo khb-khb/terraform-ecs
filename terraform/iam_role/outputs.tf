@@ -29,3 +29,7 @@ output "admin_task_role_arn" {
 output "bastion_iam_profile_name" {
   value = aws_iam_instance_profile.bastion_profile.name
 }
+
+output "codedeploy_alert_lambda_role_arn" {
+  value = aws_iam_role.codedeploy_alert_lambda_role.arn
+}

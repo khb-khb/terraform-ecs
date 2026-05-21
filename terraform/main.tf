@@ -163,6 +163,10 @@ module "iam_role" {
   admin_task_role_name         = "adminTaskRole"
   api_s3_upload_policy_name    = "api-s3-upload-policy"
   uploads_bucket_arn           = module.s3.bucket_arns["uploads"]
+
+  codedeploy_alert_lambda_role_name   = "codedeploy_alert_lambda_role"
+  codedeploy_alert_lambda_policy_name = "codedeploy_alert_lambda_policy"
+  sns_topic_deploy_alert_arn          = module.sns.deploy_topic_arn
 }
 
 module "ecs" {
@@ -348,7 +352,7 @@ module "cloudwatch_monitoring" {
 
   db_instance_identifier = module.rds.rds_instance_identifier
 
-  alarm_actions = [module.sns.monitorig_sns_topic_arn]
+  alarm_actions = [module.sns.monitoring_sns_topic_arn]
 }
 
 module "sns" {
@@ -365,12 +369,6 @@ module "sns" {
   codedeploy_iam_role_arn       = module.iam_role.codedeploy_chatbot_role_arn
   codedeploy_slack_team_id      = "T0ARLK5TVKR"
   codedeploy_slack_channel_id   = "C0AS4TVCYAZ"
-
-  codedeploy_ecs_group_arns = {
-    web   = module.codedeploy.codedeploy_ecs_group_arns["web"],
-    admin = module.codedeploy.codedeploy_ecs_group_arns["admin"],
-    api   = module.codedeploy.codedeploy_ecs_group_arns["api"]
-  }
 }
 
 module "cloudwatch_log_group" {
@@ -523,4 +521,11 @@ module "ec2" {
   subnet_id     = module.vpc.public_subnet_ids[0]
   sg_id         = [module.security_group.bastion_sg_id]
   iam           = module.iam_role.bastion_iam_profile_name
+}
+
+module "eventbridge" {
+  source = "./eventbridge"
+
+  rule_name     = "codedeploy-state-change"
+  sns_topic_arn = module.sns.deploy_topic_arn
 }

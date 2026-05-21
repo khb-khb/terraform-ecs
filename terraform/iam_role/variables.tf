@@ -37,3 +37,15 @@ variable "uploads_bucket_arn" {
 variable "admin_task_role_name" {
   type = string
 }
+
+variable "codedeploy_alert_lambda_role_name" {
+  type = string
+}
+
+variable "codedeploy_alert_lambda_policy_name" {
+  type = string
+}
+
+variable "sns_topic_deploy_alert_arn" {
+  type = string
+}

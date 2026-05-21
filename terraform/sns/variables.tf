@@ -38,6 +38,4 @@ variable "codedeploy_slack_channel_id" {
   type = string
 }
 
-variable "codedeploy_ecs_group_arns" {
-  type = map(string)
-}
+

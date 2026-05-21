@@ -246,3 +246,45 @@ resource "aws_iam_instance_profile" "bastion_profile" {
   name = "bastion-ssm-profile"
   role = aws_iam_role.bastion_role.name
 }
+
+# lambda role
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "codedeploy_alert_lambda_role" {
+  name               = var.codedeploy_alert_lambda_role_name
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+resource "aws_iam_role_policy" "codedeploy_alert_lambda_policy" {
+  name = var.codedeploy_alert_lambda_policy_name
+  role = aws_iam_role.codedeploy_alert_lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "sns:Publish"
+        Resource = var.sns_topic_deploy_alert_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
