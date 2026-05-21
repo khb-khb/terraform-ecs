@@ -131,6 +131,7 @@ app.get("/api/admin/uploads", async (req, res) => {
   }
 });
 
+// 5xx 에러 테스트
 app.get("/api/error-test", (req, res) => {
   res.status(500).json({
     status: "error",
