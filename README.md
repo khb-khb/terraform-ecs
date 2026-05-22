@@ -6,6 +6,7 @@ Architecture
 <img width="1064" height="928" alt="image" src="https://github.com/user-attachments/assets/ff08117c-b580-4294-84b3-dc39f2d41142" />
 
 Terraform Module 구조
+  
   terraform/
    - acm
    - alb
