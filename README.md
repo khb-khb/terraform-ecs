@@ -7,12 +7,12 @@ Architecture
 
 Terraform Module 구조
   terraform/
-   ├─ acm
-   ├─ alb
-   ├─ autoscaling
-   ├─ cloudfront
-   ├─ cloudwatch_loggroup
-   ├─ cloudwatch_monitoring
+   - acm
+   - alb
+   - autoscaling
+   - cloudfront
+   - cloudwatch_loggroup
+   - cloudwatch_monitoring
    ├─ codedeploy
    ├─ ec2
    ├─ ecr
