@@ -29,8 +29,7 @@ Terraform Module 구조
    - vpc
 
 CI/CD Flow
-  
-  Github Push - Github Actions Build - ECR Push - CodeDeploy ECS Deployment - Blue/Green Traffic Shift
+  - Github Push - Github Actions Build - ECR Push - CodeDeploy ECS Deployment - Blue/Green Traffic Shift
 
 주요 기능
   - ECS Blue/Green 무중단 배포
