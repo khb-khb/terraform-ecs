@@ -13,19 +13,19 @@ Terraform Module 구조
    - cloudfront
    - cloudwatch_loggroup
    - cloudwatch_monitoring
-   ├─ codedeploy
-   ├─ ec2
-   ├─ ecr
-   ├─ ecs
-   ├─ eventbridge
-   ├─ iam_role
-   ├─ rds
-   ├─ route53
-   ├─ s3
-   ├─ secrets_manager
-   ├─ security_group
-   ├─ sns
-   ├─ vpc
+   - codedeploy
+   - ec2
+   - ecr
+   - ecs
+   - eventbridge
+   - iam_role
+   - rds
+   - route53
+   - s3
+   - secrets_manager
+   - security_group
+   - sns
+   - vpc
 
 CI/CD Flow
   Github Push - Github Actions Build - ECR Push - CodeDeploy ECS Deployment - Blue/Green Traffic Shift
