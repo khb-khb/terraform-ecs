@@ -1,9 +1,0 @@
-{
-  "detail": {
-    "state": "STOP",
-    "application": "api",
-    "deploymentGroup": "api_group",
-    "deploymentId": "d-TEST1234"
-  },
-  "region": "us-west-2"
-}
